@@ -106,7 +106,6 @@ EOF
 
 echo "Fixed accumulo-env"
 
-hostname > $HOMEDIR/accumulo/conf/monitor
 hostname > $HOMEDIR/accumulo/conf/gc
 hostname > $HOMEDIR/accumulo/conf/tracers
 hostname > $HOMEDIR/accumulo/conf/gc
@@ -121,6 +120,7 @@ then
 echo "I am master"
 
 	hostname > $HOMEDIR/accumulo/conf/masters
+	hostname > $HOMEDIR/accumulo/conf/monitor
 
 	export ACCUMULO_HOME=/home/hadoop/accumulo
 	export HADOOP_HOME=/home/hadoop
@@ -146,6 +146,7 @@ echo "I am slave"
 	sudo chown $USER:$USER -R /mnt/var/log/accumulo
 	MASTER=`xmllint /etc/hadoop/conf/yarn-site.xml  --xpath "//configuration/property[name='yarn.resourcemanager.hostname']/value/text()"`
 	echo $MASTER > $HOMEDIR/accumulo/conf/masters	
+	echo $MASTER > $HOMEDIR/accumulo/conf/monitor
 echo "$MASTER is master"
 fi
 
