@@ -36,7 +36,7 @@ mkdir -p \$HOMEDIR/.versions
 cd \$HOMEDIR/.versions
 wget -q http://mirrors.ukfast.co.uk/sites/ftp.apache.org/accumulo/\${ACCUMULOV}/accumulo-\${ACCUMULOV}-bin.tar.gz
 
-tar -xvzf accumulo-\${ACCUMULOV}-bin.tar.gz
+tar -xzf accumulo-\${ACCUMULOV}-bin.tar.gz
 ln -sf \${HOMEDIR}/.versions/accumulo-\${ACCUMULOV} \${HOMEDIR}/accumulo
 
 #Get Zookeeper IP address
@@ -84,14 +84,13 @@ else
 fi
 
 \${ACCUMULO_HOME}/bin/start-here.sh
-fi
 EOF2
 
 _SUDO_
 
 echo > /home/hadoop/setup.sh << _EOF_
 #!/bin/bash
-if grep isMaster /mnt/var/lib/info/instance.json | grep true;
+if grep isMaster /mnt/var/lib/info/instance.json | grep true; 
 then
         #Create Accumulo HDFS location
         sudo -u hadoop /usr/bin/hadoop fs -mkdir /accumulo
@@ -99,7 +98,7 @@ then
 fi
 
 mkdir -p /mnt/var/log/accumulo/logs/
-sudo chown ${USER}:  /home/${USER}/accumulo.sh
+sudo chown -R ${USER}:  /home/${USER}/accumulo.sh  /mnt/var/log/accumulo
 sudo chmod u+x /home/${USER}/accumulo.sh
 
 sudo -u accumulo /home/${USER}/accumulo.sh
