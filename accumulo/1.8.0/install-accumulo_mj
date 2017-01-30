@@ -20,12 +20,12 @@ sudo adduser $USER
 #sudo sh -c "echo '$USERPW' | passwd $USER --stdin"
 
 sudo -s << _SUDO_
-cat > /home/accumulo/accumulo.sh << 'EOF2'
-
-USER=$USER
+cat > /home/${USER}/accumulo.sh << 'EOF2'
+#!/bin/bash
+USER=${USER}
 USERPW=secret
 ACCUMULO_INSTANCE=instance
-HOMEDIR=/home/accumulo
+HOMEDIR=/home/${USER}
 ACCUMULOV=1.8.0
 ACCUMULO_TSERVER_OPTS=3GB
 
@@ -34,14 +34,10 @@ mkdir -p \$HOMEDIR/.versions
 #Install accumulo
 
 cd \$HOMEDIR/.versions
-wget -q http://mirrors.ukfast.co.uk/sites/ftp.apache.org/accumulo/1.8.0/accumulo-\${ACCUMULOV}-bin.tar.gz
+wget -q http://mirrors.ukfast.co.uk/sites/ftp.apache.org/accumulo/\${ACCUMULOV}/accumulo-\${ACCUMULOV}-bin.tar.gz
 
 tar -xvzf accumulo-\${ACCUMULOV}-bin.tar.gz
-ln -sf \$HOMEDIR/.versions/accumulo-\$ACCUMULOV \$HOMEDIR/accumulo
-
-
-cp \$HOMEDIR/accumulo/conf/examples/\${ACCUMULO_TSERVER_OPTS}/standalone/* \$HOMEDIR/accumulo/conf/
-sed -i "/HDP 2.0/d" \$HOMEDIR/accumulo/conf/accumulo-site.xml 
+ln -sf \${HOMEDIR}/.versions/accumulo-\${ACCUMULOV} \${HOMEDIR}/accumulo
 
 #Get Zookeeper IP address
 if grep isMaster /mnt/var/lib/info/instance.json | grep true;
@@ -51,13 +47,10 @@ else
 	ZK_IPADDR=`xmllint /etc/hadoop/conf/yarn-site.xml  --xpath "//configuration/property[name='yarn.resourcemanager.hostname']/value/text()"`
 fi
 
+cp \${ACCUMULO_HOME}/conf/examples/\${ACCUMULO_TSERVER_OPTS}/standalone/* \${ACCUMULO_HOME}/conf/
 
-#Update accumulo-site.xml
-sed -i "s/<value>localhost:2181<\/value>/<value>\${ZK_IPADDR}:2181<\/value>/" \$HOMEDIR/accumulo/conf/accumulo-site.xml
-
-
-cat >> \$HOMEDIR/accumulo/conf/accumulo-env.sh  << EOF
-export ACCUMULO_HOME=/home/accumulo/accumulo
+cat >> \${HOMEDIR}/accumulo/conf/accumulo-env.sh  << EOF
+export ACCUMULO_HOME=/home/${USER}/accumulo
 export HADOOP_HOME=/home/hadoop
 export ACCUMULO_LOG_DIR=/mnt/var/log/accumulo
 export JAVA_HOME=/usr/lib/jvm/java
@@ -68,38 +61,52 @@ EOF
 
 . \$HOMEDIR/accumulo/conf/accumulo-env.sh	
 
-hostname > \$HOMEDIR/accumulo/conf/gc
-hostname > \$HOMEDIR/accumulo/conf/tracers
-hostname > \$HOMEDIR/accumulo/conf/gc
-hostname > \$HOMEDIR/accumulo/conf/slaves
+#Update accumulo-site.xml
+sed -i "/HDP 2.0/d" \${ACCUMULO_HOME}/conf/accumulo-site.xml 
+sed -i "s/<value>localhost:2181<\/value>/<value>\${ZK_IPADDR}:2181<\/value>/" \${ACCUMULO_HOME}/conf/accumulo-site.xml
+
+hostname > \${ACCUMULO_HOME}/conf/gc
+hostname > \${ACCUMULO_HOME}/conf/tracers
+hostname > \${ACCUMULO_HOME}/conf/gc
+hostname > \${ACCUMULO_HOME}/conf/slaves
 
 
 #Run on master/slave based on configuration
 if grep isMaster /mnt/var/lib/info/instance.json | grep true;
 then
-	hostname > \$HOMEDIR/accumulo/conf/masters
-	hostname > \$HOMEDIR/accumulo/conf/monitor
-	\$HOMEDIR/accumulo/bin/accumulo init --clear-instance-name --instance-name \$ACCUMULO_INSTANCE --password \$USERPW	
+	hostname > \${ACCUMULO_HOME}/conf/masters
+	hostname > \${ACCUMULO_HOME}/conf/monitor
+	\${ACCUMULO_HOME}/bin/accumulo init --clear-instance-name --instance-name \$ACCUMULO_INSTANCE --password \$USERPW	
 else
 	MASTER=`xmllint /etc/hadoop/conf/yarn-site.xml  --xpath "//configuration/property[name='yarn.resourcemanager.hostname']/value/text()"`
-	echo \$MASTER > \$HOMEDIR/accumulo/conf/masters	
-	echo \$MASTER > \$HOMEDIR/accumulo/conf/monitor
+	echo \$MASTER > \${ACCUMULO_HOME}/conf/masters	
+	echo \$MASTER > \${ACCUMULO_HOME}/conf/monitor
 fi
 
-\$HOMEDIR/accumulo/bin/start-here.sh
+\${ACCUMULO_HOME}/bin/start-here.sh
 fi
 EOF2
-mkdir -p /mnt/var/log/accumulo/logs/
-chown accumulo:  /home/accumulo/accumulo.sh
-chmod u+x /home/accumulo/accumulo.sh
+
 _SUDO_
 
-
-
+echo > /home/hadoop/setup.sh << _EOF_
+#!/bin/bash
 if grep isMaster /mnt/var/lib/info/instance.json | grep true;
 then
         #Create Accumulo HDFS location
-        /usr/bin/hadoop fs -mkdir /accumulo
+        sudo -u hadoop /usr/bin/hadoop fs -mkdir /accumulo
         /usr/bin/hadoop fs -chown -R $USER:$USER /accumulo
 fi
-sudo -u $USER sh -c "/home/accumulo/accumulo.sh > /home/accumulo/init.log "
+
+mkdir -p /mnt/var/log/accumulo/logs/
+sudo chown ${USER}:  /home/${USER}/accumulo.sh
+sudo chmod u+x /home/${USER}/accumulo.sh
+
+sudo -u accumulo /home/${USER}/accumulo.sh
+
+sudo sed -i 's/.*hadoop.*//' /etc/crontab
+
+_EOF_
+
+
+sudo sh -c "echo '*/1     * * * *   hadoop bash /home/hadoop/setup.sh > /home/hadoop/cron.log 2>&1 ' >> /etc/crontab"
