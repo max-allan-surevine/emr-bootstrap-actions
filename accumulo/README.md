@@ -1,18 +1,23 @@
 Running open-source Accumulo on EMR
 ====================================
 
-[Accumulo](https://accumulo.apache.org/) requires a [Zookeeper](http://zookeeper.apache.org/). It is installed as part of this bootstrap on master node.  You can refer to AWS Big data blog [Running Apache Accumulo on Amazon EMR](http://blogs.aws.amazon.com/bigdata/post/Tx15973X6QHUM43/Running-Apache-Accumulo-on-Amazon-EMR) for more information.
+[Accumulo](https://accumulo.apache.org/) requires a [Zookeeper](http://zookeeper.apache.org/). It is installed with the cluster.  You can refer to AWS Big data blog [Running Apache Accumulo on Amazon EMR](http://blogs.aws.amazon.com/bigdata/post/Tx15973X6QHUM43/Running-Apache-Accumulo-on-Amazon-EMR) for more information. 
 
 Creating cluster 
 -----------------
 
 ```
 aws emr create-cluster --name Accumulo --no-auto-terminate \
---bootstrap-actions Path=s3://elasticmapreduce.bootstrapactions/accumulo/1.6.1/install-accumulo_mj,Name=Install_Accumulo --ami-version 3.3.1 \
---instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m3.xlarge 
-InstanceGroupType=CORE,InstanceCount=2,InstanceType=m3.xlarge \
---ec2-attributes KeyName=<YOURKEY>
+   --bootstrap-actions Path=s3://BUCKET/1.6.1/install-accumulo_mj,Name=Install_Accumulo \
+   --applications Name=Hadoop Name=ZooKeeper \
+   --release-label emr-5.3.0 \
+   --instance-groups InstanceGroupType=MASTER,InstanceCount=1,InstanceType=m4.large,BidPrice=0.05 \
+                     InstanceGroupType=CORE,InstanceCount=2,InstanceType=m4.large,BidPrice=0.05 \
+   --ec2-attributes KeyName=KEY,InstanceProfile=EMR_EC2_DefaultRole,EmrManagedSlaveSecurityGroup=sg-f1444444,EmrManagedMasterSecurityGroup=sg-fe444444,SubnetId=subnet-50000000 \
+   --service-role EMR_DefaultRole
 ```
+
+You will need to adjust the BUCKET to the bucket containing your install script, KEY to your SSH key and the security group/subnet IDs to your own values. You may want to remove the "BidPrice=0.05" too.
 
 
 Running a sample
