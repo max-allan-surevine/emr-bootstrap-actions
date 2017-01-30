@@ -41,6 +41,7 @@ ln -sf \$HOMEDIR/.versions/accumulo-\$ACCUMULOV \$HOMEDIR/accumulo
 
 
 cp \$HOMEDIR/accumulo/conf/examples/\${ACCUMULO_TSERVER_OPTS}/standalone/* \$HOMEDIR/accumulo/conf/
+sed -i "/HDP 2.0/d" \$HOMEDIR/accumulo/conf/accumulo-site.xml 
 
 #Get Zookeeper IP address
 if grep isMaster /mnt/var/lib/info/instance.json | grep true;
