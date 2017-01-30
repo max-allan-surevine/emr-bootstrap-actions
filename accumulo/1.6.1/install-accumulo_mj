@@ -106,11 +106,11 @@ EOF
 
 echo "Fixed accumulo-env"
 
-hostname -f > $HOMEDIR/accumulo/conf/monitor
-hostname -f > $HOMEDIR/accumulo/conf/gc
-hostname -f > $HOMEDIR/accumulo/conf/tracers
-hostname -f > $HOMEDIR/accumulo/conf/gc
-hostname -f > $HOMEDIR/accumulo/conf/slaves
+hostname > $HOMEDIR/accumulo/conf/monitor
+hostname > $HOMEDIR/accumulo/conf/gc
+hostname > $HOMEDIR/accumulo/conf/tracers
+hostname > $HOMEDIR/accumulo/conf/gc
+hostname > $HOMEDIR/accumulo/conf/slaves
 
 echo "added hostname to slaces, tracers, etc."
 
@@ -120,7 +120,7 @@ then
 
 echo "I am master"
 
-	hostname -f > $HOMEDIR/accumulo/conf/masters
+	hostname > $HOMEDIR/accumulo/conf/masters
 
 	export ACCUMULO_HOME=/home/hadoop/accumulo
 	export HADOOP_HOME=/home/hadoop
