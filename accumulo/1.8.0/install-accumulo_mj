@@ -88,7 +88,7 @@ EOF2
 
 _SUDO_
 
-echo > /home/hadoop/setup.sh << _EOF_
+cat > /home/hadoop/setup.sh << _EOF_
 #!/bin/bash
 if grep isMaster /mnt/var/lib/info/instance.json | grep true; 
 then
