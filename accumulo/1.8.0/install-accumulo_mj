@@ -49,19 +49,17 @@ fi
 
 cp \${HOMEDIR}/accumulo/conf/examples/\${ACCUMULO_TSERVER_OPTS}/standalone/* \${HOMEDIR}/accumulo/conf/
 
-cat >> \${HOMEDIR}/accumulo/conf/accumulo-env.sh  << EOF
-export ACCUMULO_HOME=/home/${USER}/accumulo
+export ACCUMULO_HOME=/home/${USER}/accumulo >> \${HOMEDIR}/accumulo/conf/accumulo-env.sh
+cat >> \${HOMEDIR}/accumulo/conf/accumulo-env.sh  << 'EOF'
 export HADOOP_HOME=/home/hadoop
 export ACCUMULO_LOG_DIR=/mnt/var/log/accumulo
 export JAVA_HOME=/usr/lib/jvm/java
 export ZOOKEEPER_HOME=/usr/lib/zookeeper
 export HADOOP_PREFIX=/usr/lib/hadoop
 export HADOOP_CONF_DIR=/etc/hadoop/conf
-export ACCUMULO_PID_DIR=\\${ACCUMULO_HOME}/run
 EOF
 
-. \$HOMEDIR/accumulo/conf/accumulo-env.sh	
-#mkdir -p \${ACCUMULO_PID_DIR}
+\$HOMEDIR/accumulo/conf/accumulo-env.sh	
 
 #Update accumulo-site.xml
 sed -i "/HDP 2.0/d" \${ACCUMULO_HOME}/conf/accumulo-site.xml 
