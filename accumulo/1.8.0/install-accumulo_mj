@@ -84,7 +84,24 @@ else
 	echo \$MASTER > \${ACCUMULO_HOME}/conf/monitor
 fi
 
+cd \${ACCUMULO_HOME}/lib/ext
+wget -q 'https://search.maven.org/remotecontent?filepath=uk/gov/gchq/gaffer/accumulo-store/0.6.0/accumulo-store-0.6.0-iterators.jar' -O accumulo-store-0.6.0-iterators.jar
+
 \${ACCUMULO_HOME}/bin/start-here.sh
+
+if grep isMaster /mnt/var/lib/info/instance.json | grep true;
+then
+\${ACCUMULO_HOME}/bin/accumulo shell --user root -p secret << EOF
+createuser myUser
+myPassword
+myPassword
+grant -s System.CREATE_TABLE -u myUser
+user myUser
+myPassword
+createtable gafferTable
+EOF
+fi
+
 EOF2
 
 _SUDO_
