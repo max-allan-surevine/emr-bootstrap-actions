@@ -47,7 +47,7 @@ else
 	ZK_IPADDR=`xmllint /etc/hadoop/conf/yarn-site.xml  --xpath "//configuration/property[name='yarn.resourcemanager.hostname']/value/text()"`
 fi
 
-cp \${ACCUMULO_HOME}/conf/examples/\${ACCUMULO_TSERVER_OPTS}/standalone/* \${ACCUMULO_HOME}/conf/
+cp \${HOMEDIR}/accumulo/conf/examples/\${ACCUMULO_TSERVER_OPTS}/standalone/* \${HOMEDIR}/accumulo/conf/
 
 cat >> \${HOMEDIR}/accumulo/conf/accumulo-env.sh  << EOF
 export ACCUMULO_HOME=/home/${USER}/accumulo
