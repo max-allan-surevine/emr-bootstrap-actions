@@ -57,6 +57,7 @@ export JAVA_HOME=/usr/lib/jvm/java
 export ZOOKEEPER_HOME=/usr/lib/zookeeper
 export HADOOP_PREFIX=/usr/lib/hadoop
 export HADOOP_CONF_DIR=/etc/hadoop/conf
+export ACCUMULO_MONITOR_BIND_ALL="true"
 EOF
 
 \$HOMEDIR/accumulo/conf/accumulo-env.sh	
