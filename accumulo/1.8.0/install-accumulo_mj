@@ -42,9 +42,9 @@ ln -sf \${HOMEDIR}/.versions/accumulo-\${ACCUMULOV} \${HOMEDIR}/accumulo
 #Get Zookeeper IP address
 if grep isMaster /mnt/var/lib/info/instance.json | grep true;
 then
-	ZK_IPADDR=`curl http://169.254.169.254/latest/meta-data/local-ipv4`
+	ZK_IPADDR=\`curl http://169.254.169.254/latest/meta-data/local-ipv4\`
 else
-	ZK_IPADDR=`xmllint /etc/hadoop/conf/yarn-site.xml  --xpath "//configuration/property[name='yarn.resourcemanager.hostname']/value/text()"`
+	ZK_IPADDR=\`xmllint /etc/hadoop/conf/yarn-site.xml  --xpath "//configuration/property[name='yarn.resourcemanager.hostname']/value/text()"\`
 fi
 
 cp \${HOMEDIR}/accumulo/conf/examples/\${ACCUMULO_TSERVER_OPTS}/standalone/* \${HOMEDIR}/accumulo/conf/
@@ -57,9 +57,11 @@ export JAVA_HOME=/usr/lib/jvm/java
 export ZOOKEEPER_HOME=/usr/lib/zookeeper
 export HADOOP_PREFIX=/usr/lib/hadoop
 export HADOOP_CONF_DIR=/etc/hadoop/conf
+export ACCUMULO_PID_DIR=\\${ACCUMULO_HOME}/run
 EOF
 
 . \$HOMEDIR/accumulo/conf/accumulo-env.sh	
+#mkdir -p \${ACCUMULO_PID_DIR}
 
 #Update accumulo-site.xml
 sed -i "/HDP 2.0/d" \${ACCUMULO_HOME}/conf/accumulo-site.xml 
@@ -78,7 +80,7 @@ then
 	hostname > \${ACCUMULO_HOME}/conf/monitor
 	\${ACCUMULO_HOME}/bin/accumulo init --clear-instance-name --instance-name \$ACCUMULO_INSTANCE --password \$USERPW	
 else
-	MASTER=`xmllint /etc/hadoop/conf/yarn-site.xml  --xpath "//configuration/property[name='yarn.resourcemanager.hostname']/value/text()"`
+	MASTER=\`xmllint /etc/hadoop/conf/yarn-site.xml  --xpath "//configuration/property[name='yarn.resourcemanager.hostname']/value/text()"\`
 	echo \$MASTER > \${ACCUMULO_HOME}/conf/masters	
 	echo \$MASTER > \${ACCUMULO_HOME}/conf/monitor
 fi
