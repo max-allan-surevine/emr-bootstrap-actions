@@ -90,6 +90,10 @@ _SUDO_
 
 cat > /home/hadoop/setup.sh << _EOF_
 #!/bin/bash
+#Wait for datanode to start
+while ! pgrep -f "namenode|datanode" ; do  sleep 1 ; echo -n "."; done
+sleep 10
+
 if grep isMaster /mnt/var/lib/info/instance.json | grep true; 
 then
         #Create Accumulo HDFS location
